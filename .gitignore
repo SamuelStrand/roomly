@@ -151,6 +151,8 @@ activemq-data/
 
 # Environments
 .env
+.env.*
+!.env.example
 .envrc
 .venv
 env/
@@ -208,6 +210,9 @@ tempCodeRunnerFile.py
 # Ruff stuff:
 .ruff_cache/
 
+# Collected Django static assets
+staticfiles/
+
 # PyPI configuration file
 .pypirc
 
@@ -218,3 +223,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Keep project settings despite the generic virtualenv exclusions above.
+!/settings/env/
+!/settings/env/*.py
