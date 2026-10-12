@@ -9,6 +9,9 @@ from django.db import transaction
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.utils.translation import ngettext
+from unfold.admin import ModelAdmin
+from unfold.decorators import display
+from unfold.forms import AdminPasswordChangeForm
 
 from apps.users.forms import CustomUserChangeForm, CustomUserCreationForm
 from apps.users.models import CustomUser
@@ -16,18 +19,31 @@ from apps.users.models import CustomUser
 Fieldsets = tuple[tuple[str, dict[str, Any]], ...]
 
 
+def can_view_users(request: HttpRequest) -> bool:
+    """Apply the user Admin's permissions to the sidebar link."""
+    model_admin = admin.site.get_model_admin(CustomUser)
+    return model_admin.has_view_permission(request)
+
+
+def can_view_groups(request: HttpRequest) -> bool:
+    """Apply the restricted group Admin's permissions to navigation."""
+    model_admin = admin.site.get_model_admin(Group)
+    return model_admin.has_view_permission(request)
+
+
 @admin.register(CustomUser)
-class CustomUserAdmin(UserAdmin):
+class CustomUserAdmin(UserAdmin, ModelAdmin):
     """Let superusers manage accounts and authorized staff view profiles."""
 
     form = CustomUserChangeForm
     add_form = CustomUserCreationForm
+    change_password_form = AdminPasswordChangeForm
 
     list_display = (
         "id",
         "email",
         "full_name",
-        "role",
+        "display_role",
         "is_active",
         "is_deleted",
     )
@@ -41,6 +57,7 @@ class CustomUserAdmin(UserAdmin):
     search_fields = ("email", "full_name", "phone", "identity_number")
     ordering = ("email",)
     list_per_page = 50
+    list_filter_sheet = True
     readonly_fields = (
         "id",
         "created_at",
@@ -55,6 +72,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Profile",
             {
+                "classes": ("tab",),
                 "fields": (
                     "id",
                     "email",
@@ -65,10 +83,11 @@ class CustomUserAdmin(UserAdmin):
                 ),
             },
         ),
-        ("Password", {"fields": ("password",)}),
+        ("Password", {"classes": ("tab",), "fields": ("password",)}),
         (
             "Permissions",
             {
+                "classes": ("tab",),
                 "fields": (
                     "is_active",
                     "is_staff",
@@ -81,6 +100,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Dates",
             {
+                "classes": ("tab",),
                 "fields": (
                     "last_login",
                     "created_at",
@@ -94,7 +114,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Profile",
             {
-                "classes": ("wide",),
+                "classes": ("wide", "tab"),
                 "fields": (
                     "email",
                     "full_name",
@@ -109,6 +129,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Permissions",
             {
+                "classes": ("tab",),
                 "fields": (
                     "is_active",
                     "is_staff",
@@ -123,6 +144,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Profile",
             {
+                "classes": ("tab",),
                 "fields": (
                     "id",
                     "email",
@@ -137,6 +159,7 @@ class CustomUserAdmin(UserAdmin):
         (
             "Dates",
             {
+                "classes": ("tab",),
                 "fields": (
                     "last_login",
                     "created_at",
@@ -184,7 +207,25 @@ class CustomUserAdmin(UserAdmin):
         """Disable standard single and bulk user deletion in this Admin."""
         return False
 
-    @admin.display(boolean=True, description="Deleted")
+    @display(
+        description="Role",
+        ordering="role",
+        label={
+            CustomUser.Role.STUDENT: "info",
+            CustomUser.Role.TEACHER: "success",
+            CustomUser.Role.HEADMAN: "warning",
+            CustomUser.Role.MODERATOR: "danger",
+        },
+    )
+    def display_role(self, obj: CustomUser) -> tuple[str, str]:
+        """Show the university role as a label without granting rights."""
+        return obj.role, obj.get_role_display()
+
+    @admin.display(
+        boolean=True,
+        description="Marked deleted",
+        ordering="deleted_at",
+    )
     def is_deleted(self, obj: CustomUser) -> bool:
         """Show the marker using Django's standard boolean icon."""
         return obj.deleted_at is not None
@@ -221,7 +262,7 @@ admin.site.unregister(Group)
 
 
 @admin.register(Group)
-class RestrictedGroupAdmin(GroupAdmin):
+class RestrictedGroupAdmin(GroupAdmin, ModelAdmin):
     """Keep Django's Groups UI with authorization limited to superusers."""
 
     def has_module_permission(self, request: HttpRequest) -> bool:
