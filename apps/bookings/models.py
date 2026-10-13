@@ -122,11 +122,13 @@ class Booking(AbstractBaseModel):
             )
 
         now = django_timezone.now()
-        saved = (
-            None
-            if self._state.adding
-            else type(self).objects.filter(pk=self.pk).first()
-        )
+        saved = None
+        if not self._state.adding:
+            rows = type(self).objects.filter(pk=self.pk)
+            # Блокировка брони: параллельные правки идут по очереди.
+            if transaction.get_connection().in_atomic_block:
+                rows = rows.select_for_update()
+            saved = rows.first()
         is_new = saved is None
 
         if self.purpose and not self.purpose.strip():
