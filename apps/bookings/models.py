@@ -192,20 +192,25 @@ class Booking(AbstractBaseModel):
             saved.start_time,
             saved.end_time,
         )
+        approving = (
+            not is_new
+            and self.status == self.Status.APPROVED
+            and saved.status != self.Status.APPROVED
+        )
         if (
-            (is_new or rescheduled)
+            (is_new or rescheduled or approving)
             and self.start_time is not None
             and self.start_time <= now
         ):
             fail("Start time must be in the future.", "start_in_past")
 
-        if is_new and self.user_id and not self.user.is_active:
+        if (is_new or approving) and self.user_id and not self.user.is_active:
             fail("The applicant's account is not active.", "inactive_user")
 
         room_changed = not is_new and self.space_id != saved.space_id
         # Предполагается поле is_active у Space.
         if (
-            (is_new or room_changed)
+            (is_new or room_changed or approving)
             and self.space_id
             and not self.space.is_active
         ):
