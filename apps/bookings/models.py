@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from django.conf import settings
 from django.core.exceptions import NON_FIELD_ERRORS, ValidationError
+from django.db import transaction
 from django.db.models import (
     PROTECT,
     SET_NULL,
@@ -19,6 +20,7 @@ from django.utils import timezone as django_timezone
 
 from apps.abstracts.models import AbstractBaseModel
 from apps.schedules.models import BlockedPeriod, OpeningHours
+from apps.spaces.models import Space
 
 
 class Booking(AbstractBaseModel):
@@ -214,6 +216,11 @@ class Booking(AbstractBaseModel):
             fail("The room is not active.", "inactive_space")
 
         if self.status in self.ACTIVE_STATUSES and has_interval and self.space_id:
+            if transaction.get_connection().in_atomic_block:
+                Space.objects.select_for_update().filter(
+                    pk=self.space_id,
+                ).first()
+
             overlaps = (
                 type(self)
                 .objects.filter(
