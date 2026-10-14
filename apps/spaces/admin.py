@@ -47,10 +47,11 @@ class EquipmentAdmin(CatalogAdmin):
 
 class SpaceEquipmentFormSet(BaseInlineFormSet):
     def delete_existing(
-            self,
-            obj: SpaceEquipment, 
-            commit: bool = True
-            ) -> None:
+        self,
+        obj: SpaceEquipment,
+        commit: bool = True,
+    ) -> None:
+        """Remove the link physically so equipment can be added again."""
         if commit:
             SpaceEquipment.objects.filter(pk=obj.pk).delete()
 
