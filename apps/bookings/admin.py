@@ -1,9 +1,10 @@
 from typing import Any
 
-from django.contrib.admin import ModelAdmin, register
+from django.contrib.admin import register
 from django.forms import ModelForm
 from django.http import HttpRequest
 from django.utils import timezone as django_timezone
+from unfold.admin import ModelAdmin
 
 from apps.bookings.forms import BookingAdminForm
 from apps.bookings.models import Booking
