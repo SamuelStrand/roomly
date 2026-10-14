@@ -32,10 +32,10 @@ class Notification(AbstractBaseModel):
 
 
     class Meta:
-        """Admin visible name and oredering."""
+        """Admin visible name and ordering."""
         verbose_name = "Notification"
         verbose_name_plural = "Notifications"
-        ordering = ("-created_at")
+        ordering = ("-created_at",)
 
     def clean(self) -> None:
         """Require nonblank text and recipient related to booking."""
@@ -57,7 +57,7 @@ class Notification(AbstractBaseModel):
                 and self.recipient_id != booking_user_id
             ):
                 errors["recipient"] = (
-                    "Recipirnt should match booking creator"
+                    "Recipient should match booking creator"
             )
         
         if errors:

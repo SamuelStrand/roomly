@@ -104,7 +104,7 @@ class NotificationAdmin(ModelAdmin):
             request: HttpRequest,
             obj: Notification | None = None,
     ) -> tuple[str, ...]:
-        """Readonly."""
+        """Protect notification details after creation."""
 
         fields = tuple(super().get_readonly_fields(request, obj))
 
@@ -121,7 +121,7 @@ class NotificationAdmin(ModelAdmin):
         ordering="recipient__email"
     )
     def recipient_email(self, obj: Notification) -> str:
-        "Show the notification recipirnt email. "
+        "Show the notification recipient email. "
         return obj.recipient.email
     
     @admin.display(description="Message")
@@ -138,7 +138,7 @@ class NotificationAdmin(ModelAdmin):
 
     @admin.action(
         description="Mark selected unread notification as read.", 
-        permissions=["change"]
+        permissions=["change"],
     )
     def mark_as_read(
         self, 
