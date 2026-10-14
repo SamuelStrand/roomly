@@ -205,12 +205,16 @@ class Booking(AbstractBaseModel):
         ):
             fail("Start time must be in the future.", "start_in_past")
 
-        if (is_new or approving) and self.user_id and not self.user.is_active:
+        if (
+            (is_new or rescheduled or approving)
+            and self.user_id
+            and not self.user.is_active
+        ):
             fail("The applicant's account is not active.", "inactive_user")
 
         room_changed = not is_new and self.space_id != saved.space_id
         if (
-            (is_new or room_changed or approving)
+            (is_new or rescheduled or room_changed or approving)
             and self.space_id
             and not self.space.is_active
         ):
@@ -227,7 +231,6 @@ class Booking(AbstractBaseModel):
                 .objects.filter(
                     space_id=self.space_id,
                     status__in=self.ACTIVE_STATUSES,
-                    deleted_at__isnull=True,
                     start_time__lt=self.end_time,
                     end_time__gt=self.start_time,
                 )
