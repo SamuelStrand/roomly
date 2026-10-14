@@ -4,6 +4,7 @@ from django.forms.models import BaseInlineFormSet
 from django.http import HttpRequest
 from unfold.admin import ModelAdmin, TabularInline
 
+from apps.schedules.admin import OpeningHoursInline
 from apps.spaces.models import (
     Building,
     Equipment,
@@ -86,7 +87,10 @@ class SpaceAdmin(ModelAdmin):
     autocomplete_fields = ("building", "space_type")
     readonly_fields = TIMESTAMP_FIELDS
     list_select_related = ("building", "space_type")
-    inlines = (SpaceEquipmentInline,)
+    inlines = (
+        SpaceEquipmentInline,
+        OpeningHoursInline,
+    )
     fieldsets = (
         ("Location", {"fields": ("building", "number", "floor")}),
         ("Room", {"fields": ("name", "space_type", "capacity", "is_active")}),
