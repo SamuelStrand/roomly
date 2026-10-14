@@ -1,9 +1,9 @@
 from django.conf import settings
-
-from django.db.models import BooleanField, ForeignKey, TextField, PROTECT
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.db.models import PROTECT, BooleanField, ForeignKey, TextField
 
 from apps.abstracts.models import AbstractBaseModel
+
 
 class Notification(AbstractBaseModel):
     """Manually created notifications for bookings."""
@@ -35,7 +35,7 @@ class Notification(AbstractBaseModel):
         """Admin visible name and oredering."""
         verbose_name = "Notification"
         verbose_name_plural = "Notifications"
-        ordering = ["-created_at"]
+        ordering = ("-created_at")
 
     def clean(self) -> None:
         """Require nonblank text and recipient related to booking."""

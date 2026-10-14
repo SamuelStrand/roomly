@@ -8,7 +8,6 @@ from unfold.admin import ModelAdmin
 
 from apps.notifications.models import Notification
 
-
 Fieldsets = tuple[tuple[str, dict[str, Any]], ...]
 
 
