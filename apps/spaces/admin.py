@@ -46,7 +46,11 @@ class EquipmentAdmin(CatalogAdmin):
 
 
 class SpaceEquipmentFormSet(BaseInlineFormSet):
-    def delete_existing(self, obj: SpaceEquipment, commit: bool = True) -> None:
+    def delete_existing(
+            self,
+            obj: SpaceEquipment, 
+            commit: bool = True
+            ) -> None:
         if commit:
             SpaceEquipment.objects.filter(pk=obj.pk).delete()
 
