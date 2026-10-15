@@ -84,6 +84,7 @@ class OpeningHours(AbstractBaseModel):
             and self.opens_at is not None
             and self.closes_at is not None
             and self.opens_at < self.closes_at
+            and self.weekday is not None
             and 0 <= self.weekday <= 6
         )
 

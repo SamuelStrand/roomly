@@ -9,6 +9,7 @@ ROOT_URLCONF = "settings.urls"
 WSGI_APPLICATION = "settings.wsgi.application"
 ASGI_APPLICATION = "settings.asgi.application"
 AUTH_USER_MODEL = "users.CustomUser"
+LOGIN_REDIRECT_URL = reverse_lazy("admin:index")
 
 
 DJANGO_AND_THIRD_PARTY_APPS = [

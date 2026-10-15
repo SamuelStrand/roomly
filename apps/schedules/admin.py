@@ -148,6 +148,17 @@ class BlockedPeriodAdmin(ModelAdmin):
 
     readonly_fields = ("created_at", "updated_at")
 
+    def delete_model(
+        self,
+        request: HttpRequest,
+        obj: BlockedPeriod,
+    ) -> None:
+        """Use physical deletion for single and bulk block removal."""
+        self.delete_queryset(
+            request,
+            self.get_queryset(request).filter(pk=obj.pk),
+        )
+
     def get_queryset(
         self,
         request: HttpRequest,
